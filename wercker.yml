@@ -24,7 +24,7 @@ build:
     - script:
         name: output release tag
         code: |
-          git describe --tags --exact --match 'v*' | tee "${WERCKER_OUTPUT_DIR}/.release_tag" || true
+          git describe --tags --exact --match '*.*.*' | tee "${WERCKER_OUTPUT_DIR}/.release_tag" || true
     - script:
         name: wercker debug
         code: |

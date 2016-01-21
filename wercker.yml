@@ -1,23 +1,18 @@
 box: golang:1.5.3
 build:
   steps:
-    - setup-go-workspace:
-        package-dir: github.com/stepanstipl/greenpeace
-  # - script:
-  #      name: overwrite GOPATH
-  #      code: |
-  #        export GOPATH="/go" && \
-  #        export PACKAGE="github.com/stepanstipl/greenpeace" && \
-  #        mkdir -p "${GOPATH}/src/github.com/stepanstipl" && \
-  #        ln -s "${WERCKER_SOURCE_DIR}" "${GOPATH}/src/${PACKAGE}"
-  #  - script:
-  #      name: go get
-  #      code: |
-  #       go get ./...
+    - script:
+        name: setup env
+        code: |
+          export GOPATH="/go" && \
+          export PACKAGE="github.com/stepanstipl/greenpeace" && \
+          export GO15VENDOREXPERIMENT=1 && \
+          mkdir -p "${GOPATH}/src/github.com/stepanstipl" && \
+          ln -s "${WERCKER_SOURCE_DIR}" "${GOPATH}/src/${PACKAGE}"
     - script:
         name: go build
         code: |
-          GO15VENDOREXPERIMENT=1 CGO_ENABLED=0 go build -a -ldflags '-s' -v ./...
+          CGO_ENABLED=0 go build -a -ldflags '-s' -v $PACKAGE
 #    - script:
 #        name: go test
 #        code: |
@@ -25,7 +20,7 @@ build:
     - script:
         name: create greenpeace binary archive
         code: |
-          tar zcvf "${WERCKER_OUTPUT_DIR}/greenpeace.tar.gz" greenpeace 
+          tar zcvf "${WERCKER_OUTPUT_DIR}/greenpeace.tar.gz" greenpeace
     - script:
         name: output release tag
         code: |

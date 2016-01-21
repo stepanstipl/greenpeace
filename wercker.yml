@@ -1,0 +1,52 @@
+box: golang:1.5.3
+build:
+  steps:
+    - setup-go-workspace:
+        package-dir: github.com/stepanstipl/greenpeace
+  # - script:
+  #      name: overwrite GOPATH
+  #      code: |
+  #        export GOPATH="/go" && \
+  #        export PACKAGE="github.com/stepanstipl/greenpeace" && \
+  #        mkdir -p "${GOPATH}/src/github.com/stepanstipl" && \
+  #        ln -s "${WERCKER_SOURCE_DIR}" "${GOPATH}/src/${PACKAGE}"
+  #  - script:
+  #      name: go get
+  #      code: |
+  #       go get ./...
+    - script:
+        name: go build
+        code: |
+          GO15VENDOREXPERIMENT=1 CGO_ENABLED=0 go build -a -ldflags '-s' -v ./...
+#    - script:
+#        name: go test
+#        code: |
+#          go test -v $PACKAGE
+    - script:
+        name: create greenpeace binary archive
+        code: |
+          tar zcvf "${WERCKER_OUTPUT_DIR}/greenpeace.tar.gz" greenpeace 
+    - script:
+        name: output release tag
+        code: |
+          git describe --tags --exact --match 'v*' | tee "${WERCKER_OUTPUT_DIR}/.release_tag" || true
+    - script:
+        name: wercker debug
+        code: |
+          ls -al $WERCKER_OUTPUT_DIR
+deploy:
+  steps:
+    - script:
+        name: restore release tag
+        code: |
+          echo $WERCKER_ROOT && \
+          ls -al $WERCKER_ROOT && \
+          export MY_RELEASE_TAG=$(cat $WERCKER_ROOT/.release_tag) && \
+          echo "Release tag: ${MY_RELEASE_TAG}"
+    - github-create-release:
+        token: $GITHUB_TOKEN
+        tag: $MY_RELEASE_TAG
+    - github-upload-asset:
+        token: $GITHUB_TOKEN
+        file: greenpeace.tar.gz
+        content_type: application/x-gzip

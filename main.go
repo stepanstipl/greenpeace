@@ -19,7 +19,7 @@ func loadEnv(secretsDir string) {
 		content, _ := ioutil.ReadFile(filePath)
 		envValue := strings.TrimSpace(string(content))
 
-		envName := strings.ToUpper(f.Name())
+		envName := strings.ToUpper(strings.Replace(f.Name(), "-", "_", -1))
 
 		os.Setenv(envName, envValue)
 		// env = append(env, fmt.Sprintf("%s=%s", envName, content_str))

@@ -70,7 +70,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	dir := "./secrets"
+	dir := "/secrets"
 	loadEnv(dir)
 
 	err := runCmd()
